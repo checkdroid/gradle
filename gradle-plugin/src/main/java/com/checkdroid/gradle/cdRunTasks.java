@@ -12,7 +12,6 @@ import org.apache.http.util.EntityUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -32,16 +31,26 @@ public class cdRunTasks extends DefaultTask {
 
         MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
 
+        if(extensions.debug){
+            System.out.println("Uploading");
+            System.out.println("email : " + extensions.email);
+            System.out.println("appName : " + getProject().getParent().getName());
+            System.out.println("PackageName : " + extensions.packageName);
+            System.out.println("appApk : " + extensions.appApk);
+            System.out.println("testApk : " + extensions.appApk);
+        }
         multipartEntity.addBinaryBody("appApk", extensions.appApk, ContentType.create("application/vnd.android.package-archive"), extensions.appApk.getName());
         multipartEntity.addBinaryBody("testApk", extensions.testApk, ContentType.create("application/vnd.android.package-archive"), extensions.testApk.getName());
         multipartEntity.addPart("email", new StringBody(extensions.email, ContentType.TEXT_PLAIN));
         multipartEntity.addPart("apiKey", new StringBody(extensions.apiKey, ContentType.TEXT_PLAIN));
         multipartEntity.addPart("appName", new StringBody(getProject().getParent().getName(),ContentType.TEXT_PLAIN));
-        multipartEntity.addPart("packageName", new StringBody(extensions.fetchPackageName(),ContentType.TEXT_PLAIN));
+        multipartEntity.addPart("packageName", new StringBody(extensions.packageName,ContentType.TEXT_PLAIN));
 
         httppost.setEntity(multipartEntity.build());
+        if(extensions.debug){
+            System.out.println("executing request " + httppost.getRequestLine());
+        }
 
-        System.out.println("executing request " + httppost.getRequestLine());
         HttpResponse response = null;
         try {
             response = httpclient.execute(httppost);
@@ -51,7 +60,14 @@ public class cdRunTasks extends DefaultTask {
         }
         HttpEntity resEntity = response.getEntity();
 
-        System.out.println(response.getStatusLine());
+        if(extensions.debug){
+            System.out.println(response.getStatusLine());
+        }
+
+        if(response.getStatusLine().getStatusCode() == 200){
+            System.out.println("Successfully uploaded apks");
+        }
+
         if (resEntity != null) {
             try {
                 System.out.println(EntityUtils.toString(resEntity));

@@ -1,6 +1,5 @@
 package com.checkdroid.gradle
 
-import org.apache.commons.lang.StringUtils;
 import org.gradle.api.Project
 
 class CheckdroidExtension {
@@ -10,6 +9,8 @@ class CheckdroidExtension {
     public String email;
     public String apiKey;
     public String server;
+    public String packageName;
+    public Boolean debug;
 
     public CheckdroidExtension(Project target) {
         this.target = target;
@@ -20,6 +21,8 @@ class CheckdroidExtension {
         testApk = new File(apkDir, "app-debug-androidTest-unaligned.apk");
         email = new String();
         apiKey = new String();
+        packageName = fetchPackageName();
+        debug = false;
         server = new String("app.checkdroid.com");
     }
 
