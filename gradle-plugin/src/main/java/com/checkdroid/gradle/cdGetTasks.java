@@ -20,18 +20,18 @@ public class cdGetTasks extends DefaultTask {
 
     @TaskAction
     public void cdGetTests(){
-        CheckdroidExtension extensions = (CheckdroidExtension) getProject()
+        CheckdroidExtension ext = (CheckdroidExtension) getProject()
                 .getExtensions().findByName("checkdroid");
 
-        if(extensions.debug){
-            System.out.println("Server set to: " + extensions.server);
-            System.out.println("Fetching Tests for "+ extensions.email + " and " + extensions.packageName);
+        if(ext.debug){
+            System.out.println("Server set to: " + ext.server);
+            System.out.println("Fetching Tests for "+ ext.email + " and " + ext.fetchPackageName());
         }
         URIBuilder builder = new URIBuilder();
-        builder.setScheme("http").setHost(extensions.server).setPath("/api/package/testcases")
-                .setParameter("email", extensions.email)
-                .setParameter("packagename",extensions.packageName)
-                .setParameter("apiKey", extensions.apiKey);
+        builder.setScheme("http").setHost(ext.server).setPath("/api/package/testcases")
+                .setParameter("email", ext.email)
+                .setParameter("packagename",ext.fetchPackageName())
+                .setParameter("apiKey", ext.apiKey);
 
         HttpClient httpclient = new DefaultHttpClient();
         HttpGet get = new HttpGet(builder.toString());
@@ -44,7 +44,7 @@ public class cdGetTasks extends DefaultTask {
         }
         HttpEntity resEntity = response.getEntity();
 
-        if(extensions.debug){
+        if(ext.debug){
             System.out.println("Response: " + response.getStatusLine());
         }
 
@@ -59,7 +59,7 @@ public class cdGetTasks extends DefaultTask {
             BufferedInputStream bis = null;
             try {
                 bis = new BufferedInputStream(resEntity.getContent());
-                String filePath = extensions.fetchTestDir() + File.separatorChar + "BaristaTests.java";
+                String filePath = ext.fetchTestDir() + File.separatorChar + "BaristaTests.java";
                 File file = new File(filePath);
                 if (file.exists()) {
                     System.err.println("BaristaTests.java exists, delete the file and run task again to generate new file ");
